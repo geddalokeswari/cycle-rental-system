@@ -1,0 +1,33 @@
+.app {
+  font-family: Arial, sans-serif;
+}
+
+nav {
+  background: #343a40;
+  padding: 10px 20px;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2em;
+  padding: 10px 20px;
+  transition: background 0.3s;
+}
+
+nav ul li a:hover {
+  background: #495057;
+  border-radius: 5px;
+}

@@ -1,0 +1,50 @@
+.add-cycle-page {
+    padding: 20px;
+    background: #f0f2f5;
+    text-align: center;
+}
+
+.add-cycle-page h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.add-cycle-page form {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: inline-block;
+}
+
+.add-cycle-page label {
+    display: block;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.add-cycle-page input[type="text"],
+.add-cycle-page input[type="number"],
+.add-cycle-page input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.add-cycle-page button {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.add-cycle-page button:hover {
+    background: #218838;
+}
