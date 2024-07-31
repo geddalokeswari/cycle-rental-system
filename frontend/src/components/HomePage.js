@@ -1,36 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import './HomePage.css'; // Import the CSS file
 
 const HomePage = () => {
     const [cycles, setCycles] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchCycles();
-    }, []);
-
-    const fetchCycles = async () => {
+    const fetchCycles = useCallback(async () => {
         try {
             setLoading(true);
             const response = await axios.get('http://localhost:8080/cycles');
-            console.log('Fetched cycles:', response.data);
             if (Array.isArray(response.data)) {
                 setCycles(response.data);
                 setError(null);
             } else {
-                throw new Error('Received invalid data format from server');
+                throw new Error('Invalid data format from server');
             }
         } catch (error) {
-            console.error("There was an error fetching the cycles!", error);
+            console.error("Error fetching cycles:", error);
             setError(`Error fetching cycles: ${error.message}`);
-            if (error.response) {
-                console.error('Error response:', error.response.data);
-            }
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchCycles();
+    }, [fetchCycles]);
 
     const handleRentCycle = async (cycleId) => {
         try {
@@ -52,56 +49,46 @@ const HomePage = () => {
         ));
     };
 
-    const getValidPhotoUrl = (photoUrl) => {
-        if (!photoUrl) return null;
-        try {
-            // Ensure the URL is properly encoded
-            const url = new URL(photoUrl);
-            url.pathname = encodeURIComponent(url.pathname.split('/').pop());
-            return url.toString();
-        } catch (error) {
-            console.error(`Invalid photo URL: ${photoUrl}`);
-            return null;
-        }
-    };
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
-
     return (
-        <div>
-            <h1>Available Cycles</h1>
-            {cycles.length === 0 ? (
-                <p>No cycles available at the moment.</p>
+        <div className="home-container">
+            <h1 className="title">Available Cycles</h1>
+            {loading ? (
+                <p className="loading">Loading...</p>
+            ) : error ? (
+                <p className="error">Error: {error}</p>
             ) : (
-                cycles.map(cycle => {
-                    const validPhotoUrl = getValidPhotoUrl(cycle.photo_url);
-                    return (
-                        <div key={cycle._id}>
-                            <h3>{cycle.name}</h3>
-                            <p>Cost: {cycle.cost}</p>
-                            {validPhotoUrl && !cycle.imageLoadError ? (
-                                <img 
-                                    src={validPhotoUrl} 
-                                    alt={cycle.name} 
-                                    style={{maxWidth: '200px'}} 
-                                    onError={() => handleImageError(cycle._id)}
-                                />
-                            ) : cycle.imageLoadError ? (
-                                <p>Image failed to load</p>
-                            ) : (
-                                <p>No image available</p>
-                            )}
-                            <p>Photo URL: {validPhotoUrl || 'Not available'}</p>
-                            <button 
-                                onClick={() => handleRentCycle(cycle._id)} 
-                                disabled={!cycle.available}
-                            >
-                                {cycle.available ? 'Rent Now' : 'Not Available'}
-                            </button>
-                        </div>
-                    );
-                })
+                cycles.length === 0 ? (
+                    <p className="no-cycles">No cycles available at the moment.</p>
+                ) : (
+                    <div className="cycles-list">
+                        {cycles.map(cycle => {
+                            const validPhotoUrl = cycle.photo_url ? cycle.photo_url.replace(/['"]/g, '') : '';
+                            return (
+                                <div key={cycle._id} className="cycle-card">
+                                    <h3 className="cycle-name">{cycle.name}</h3>
+                                    <p className="cycle-cost">Cost: ${cycle.cost}</p>
+                                    {validPhotoUrl ? (
+                                        <img 
+                                            src={validPhotoUrl} 
+                                            alt={cycle.name} 
+                                            className="cycle-image"
+                                            onError={() => handleImageError(cycle._id)}
+                                        />
+                                    ) : (
+                                        <p className="no-image">No image available</p>
+                                    )}
+                                    <button 
+                                        onClick={() => handleRentCycle(cycle._id)} 
+                                        disabled={!cycle.available}
+                                        className={`rent-button ${cycle.available ? 'available' : 'unavailable'}`}
+                                    >
+                                        {cycle.available ? 'Rent Now' : 'Not Available'}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )
             )}
         </div>
     );
