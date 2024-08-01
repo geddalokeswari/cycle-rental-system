@@ -1,16 +1,13 @@
 from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS # type: ignore
-from pymongo import MongoClient # type: ignore
-from bson.objectid import ObjectId # type: ignore
-import gridfs # type: ignore
+from flask_cors import CORS
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+import gridfs
 import logging
-from bson import json_util # type: ignore
-import json
 
 app = Flask(__name__)
 CORS(app)
 
-# Set up logging
 logging.basicConfig(level=logging.DEBUG)
 
 client = MongoClient('mongodb://localhost:27017/')
@@ -40,7 +37,6 @@ def get_cycles():
         serialized_cycles = serialize_object(cycles)
         for cycle in serialized_cycles:
             if 'photo_id' in cycle and cycle['photo_id']:
-                # Ensure photo_id is a string
                 photo_id_str = str(cycle['photo_id'])
                 cycle['photo_url'] = f"http://localhost:8080/photos/{photo_id_str}"
             else:
@@ -56,14 +52,12 @@ def get_photo(photo_id):
     try:
         app.logger.info(f"Serving photo with ID: {photo_id}")
 
-        # Convert string back to ObjectId
         try:
             object_id = ObjectId(photo_id)
         except Exception as e:
             app.logger.error(f"Invalid ObjectId format: {photo_id}. Error: {str(e)}")
             return jsonify({'error': 'Invalid photo ID format'}), 400
 
-        # Fetch the photo from GridFS
         photo = fs.get(object_id)
         return send_file(
             photo,
@@ -135,6 +129,24 @@ def get_orders():
     except Exception as e:
         app.logger.error(f"Error occurred while fetching orders: {str(e)}")
         return jsonify({"error": "Failed to retrieve orders", "details": str(e)}), 500
+
+@app.route('/cycles/<cycle_id>', methods=['GET'])
+def get_cycle(cycle_id):
+    try:
+        cycle = cycles_collection.find_one({'_id': ObjectId(cycle_id)})
+        if cycle:
+            serialized_cycle = serialize_object(cycle)
+            if 'photo_id' in serialized_cycle and serialized_cycle['photo_id']:
+                photo_id_str = str(serialized_cycle['photo_id'])
+                serialized_cycle['photo_url'] = f"http://localhost:8080/photos/{photo_id_str}"
+            else:
+                serialized_cycle['photo_url'] = None
+            return jsonify(serialized_cycle)
+        else:
+            return jsonify({"error": "Cycle not found"}), 404
+    except Exception as e:
+        app.logger.error(f"Error occurred while fetching cycle: {str(e)}")
+        return jsonify({"error": "Failed to retrieve cycle", "details": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(port=8080, debug=True)

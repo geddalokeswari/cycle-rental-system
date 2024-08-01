@@ -31,10 +31,16 @@ const HomePage = () => {
 
     const handleRentCycle = async (cycleId) => {
         try {
-            await axios.post(`http://localhost:8080/rent_cycle/${cycleId}`, {
-                user: 'TestUser',
-                rental_date: new Date().toISOString()
+            const formData = new FormData();
+            formData.append('user', 'TestUser');
+            formData.append('rental_date', new Date().toISOString());
+
+            await axios.post(`http://localhost:8080/rent_cycle/${cycleId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
+
             fetchCycles();
         } catch (error) {
             console.error("Error renting cycle:", error);
