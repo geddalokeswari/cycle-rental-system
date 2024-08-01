@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
-from pymongo import MongoClient
-from bson.objectid import ObjectId
-import gridfs
+from flask_cors import CORS # type: ignore
+from pymongo import MongoClient # type: ignore
+from bson.objectid import ObjectId # type: ignore
+import gridfs # type: ignore
 import logging
-from bson import json_util
+from bson import json_util # type: ignore
 import json
 
 app = Flask(__name__)
